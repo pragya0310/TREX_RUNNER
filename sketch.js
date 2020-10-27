@@ -32,28 +32,30 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(600, 200);
+  createCanvas(windowWidth,windowHeight);
   
-  trex = createSprite(50, 160, 20, 50);
+  trex = createSprite(50,height-40, 20, 50);
   trex.addAnimation("running", trex_running);
   trex.addAnimation("collided", trex_collided)
   trex.scale = 0.5;
+  trex.setCollider("rectangle",0,0,10,100);
+ //trex.debug=true;              
   
-  ground = createSprite(200, 180, 400, 20);
+  ground = createSprite(width/2,height-20,width, 20);
   ground.addImage("ground", groundImage);
   ground.x = ground.width / 2;
 
-  gameOver = createSprite(300, 50, 50, 50)
+  gameOver = createSprite(width/2,height/2, 50, 50)
   gameOver.addImage(gameOverImage);
   gameOver.visible = false;
   gameOver.scale = 0.8;
 
-  restart = createSprite(300, 100, 50, 50);
+  restart = createSprite(width/2,(height/2)+50, 50, 50);
   restart.addImage(restartImage);
   restart.visible = false;
   restart.scale = 0.5;
 
-  invisibleGround = createSprite(200, 190, 400, 10);
+  invisibleGround = createSprite(width/2,height-10,width, 10);
   invisibleGround.visible = false;
   
   cloudGroup = new Group();
@@ -64,10 +66,10 @@ function setup() {
 function draw() {
   background(180);
 console.log(frameCount+"\t"+Math.round(getFrameRate()/60))
-  if (gameState == 1) {
+  if (gameState == 1){
     ground.velocityX = -(4 + groundSpeed) //score/10);
-    if (keyDown("space") && trex.y >= 100) {
-      trex.velocityY = -10;
+    if ((keyDown("space")||touches.length>0) && trex.y >= height-40 && gameState==1) {
+      trex.velocityY = -15;
       jumpSound.play();
     }
     gameOver.visible=false;
@@ -79,6 +81,8 @@ console.log(frameCount+"\t"+Math.round(getFrameRate()/60))
       cloudGroup.setLifetimeEach(-1);
       ground.velocityX = 0;
       trex.changeAnimation("collided");
+      trex.setVelocity(0,0);
+      trex.x=50;trex.y=height-40;
       dieSound.play();
       gameState = 0;
     }
@@ -97,7 +101,7 @@ console.log(frameCount+"\t"+Math.round(getFrameRate()/60))
     cloudGroup.setVelocityXEach(0);
     gameOver.visible = true;
     restart.visible = true;
-    if (mousePressedOver(restart)) {
+    if(mousePressedOver(restart)||touches.length>0) {
       obstacleGroup.destroyEach();
       cloudGroup.destroyEach();
       gameState = 1;
@@ -115,12 +119,12 @@ console.log(frameCount+"\t"+Math.round(getFrameRate()/60))
   function spawnClouds() {
   
     if (frameCount % 60 === 0) {
-      cloud = createSprite(600, 100, 40, 10);
+      cloud = createSprite(width,100, 40, 10);
       cloud.addImage(cloudImage)
-      cloud.y = Math.round(random(10, 60))
+      cloud.y = Math.round(random(0,height-100))
       cloud.scale = 0.4;
       cloud.velocityX = -3;
-      cloud.lifetime = 600 / 3;
+      cloud.lifetime = width/ 3;
 
       cloud.depth = trex.depth
       trex.depth = trex.depth + 1;
@@ -131,7 +135,7 @@ console.log(frameCount+"\t"+Math.round(getFrameRate()/60))
   function spawnObsticles() {
    
     if (frameCount % 60 === 0) {
-      obsticles = createSprite(600, 165, 10, 40);
+      obsticles = createSprite(width,height-35, 10, 40);
     
       obsticles.velocityX = -6;
       var anyone = Math.round(random(1, 6))
@@ -145,19 +149,23 @@ console.log(frameCount+"\t"+Math.round(getFrameRate()/60))
           break;
         case 3:
           obsticles.addImage(obstacle3Image);
+          obsticles.scale=0.5
           break;
         case 4:
           obsticles.addImage(obstacle4Image);
+          obsticles.scale=0.6;
           break;
         case 5:
           obsticles.addImage(obstacle5Image);
+          obsticles.scale=0.2;
           break;
         case 6:
           obsticles.addImage(obstacle6Image);
+          obsticles.scale=0.05;
           break;
       }
       obsticles.scale = 0.6;
-      obsticles.lifetime = 600 / 3;
+      obsticles.lifetime = width/6;
       obstacleGroup.add(obsticles);
     }
   }
